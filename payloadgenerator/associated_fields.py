@@ -6,19 +6,20 @@ It generates payload1 for field1 and calculates the payload
 without the hassle of generating the payload2 wordlist first
 """
 
+
 from base64 import b64encode;
 from hashlib import sha1;
 from java.lang import Long;     # bug resolution import
 
-INITIAL_VALUE = 0; 
+INITIAL_VALUE = 0;
 count = INITIAL_VALUE;
 passfile_path = 'K:\\payloads.txt';
-pl_buff = list();
+pl_buff = [];
 lines = 0;
 for line in open(passfile_path):  
     pl_buff.append(line.rstrip());
     lines += 1;
-middle = str('&check=');
+middle = '&check=';
 NUMBER_OF_PAYLOADS = lines;
 
 def getNumberOfPayloads():

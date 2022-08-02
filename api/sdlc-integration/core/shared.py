@@ -11,10 +11,10 @@ def init_zap():
 
 	# Wait for ZAP to start
 	wait_timeout = 120 # 2min
-	while(wait_timeout > 0):
+	while (wait_timeout > 0):
 		wait_timeout -= 1
 		try:
-			logging.debug ('ZAP Version ' + zap.core.version)
+			logging.debug(f'ZAP Version {zap.core.version}')
 			break
 		except IOError:
 			logging.debug ('Waiting for ZAP to start...')
@@ -45,9 +45,9 @@ def write_config_file(filename, zap):
 		f.write('# change WARN to IGNORE to ignore rule or FAIL to fail if rule matches\n')
 		f.write('# only the rule identifiers are used - the names are just for info\n')
 		for key, rule in sorted(all_dict.iteritems()):
-			f.write('{}\t{}\t({})\n'.format(key, rule["status"], rule["name"]))
+			f.write(f'{key}\t{rule["status"]}\t({rule["name"]})\n')
 
-		logging.info("Config file template has been saved - " + filename)
+		logging.info(f"Config file template has been saved - {filename}")
 
 
 def read_config_file(filename):

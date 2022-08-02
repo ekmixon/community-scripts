@@ -56,14 +56,15 @@ def create_jira_report(report, critical, details=""):
 	details = details.replace("\t", "    ")
 	new_issue_data = {
 		"fields": {
-			"project": { "key": config.jira_project_key },
-			"summary": "ZAP Security Report - " + str_date,
+			"project": {"key": config.jira_project_key},
+			"summary": f"ZAP Security Report - {str_date}",
 			"description": details + "\n\n" + descr,
-			"issuetype": { "name": "Bug" },
-			"priority": { "id": "2" if critical else "5"},
-			"assignee": { "name": "" }
-	   }
+			"issuetype": {"name": "Bug"},
+			"priority": {"id": "2" if critical else "5"},
+			"assignee": {"name": ""},
+		}
 	}
+
 	logging.debug(new_issue_data)
 	auth = (config.jira_auth["user"], config.jira_auth["pw"])
 	r = requests.post(base_url, json=new_issue_data, auth=auth)
@@ -71,13 +72,21 @@ def create_jira_report(report, critical, details=""):
 	r = r.json()
 	issue_key = r["id"]
 	# Add the html report as an attachment
-	r = requests.post(base_url + "/{}/attachments".format(issue_key), auth=auth,
+	r = requests.post(
+		base_url + f"/{issue_key}/attachments",
+		auth=auth,
 		headers={"X-Atlassian-Token": "no-check"},
-		files={'file': ('report.html', open(filename, 'rb'),  "text/html")})
+		files={'file': ('report.html', open(filename, 'rb'), "text/html")},
+	)
+
 	logging.debug(r.text)
-	if( not critical ): # mark closed
-		r = requests.post(base_url + "/{}/transitions".format(issue_key), auth=auth,
-			json={ "transition": { "id": "2" } })
+	if ( not critical ): # mark closed
+		r = requests.post(
+			base_url + f"/{issue_key}/transitions",
+			auth=auth,
+			json={"transition": {"id": "2"}},
+		)
+
 	logging.debug("Report complete")
 
 
@@ -97,8 +106,13 @@ def setup_zap_session_context(zap, ctx_targets):
 
 	# Authentication
 	login_url = config.target_auth["login_url"]
-	zap.authentication.set_authentication_method(ctx_id, "formBasedAuthentication",
-		"loginUrl="+ login_url + "&loginRequestData=email={%25username%25}%26password={%25password%25}")
+	zap.authentication.set_authentication_method(
+		ctx_id,
+		"formBasedAuthentication",
+		f"loginUrl={login_url}"
+		+ "&loginRequestData=email={%25username%25}%26password={%25password%25}",
+	)
+
 	zap.authentication.set_logged_in_indicator(ctx_id, "signout") # any regexp
 	zap.authentication.set_logged_out_indicator(ctx_id, "signup")
 
@@ -107,9 +121,12 @@ def setup_zap_session_context(zap, ctx_targets):
 
 def setup_new_user(zap, ctx_id):
 	user_id = zap.users.new_user(ctx_id, "test_user")
-	zap.users.set_authentication_credentials(ctx_id, user_id,
-		"password={}&username={}&type=UsernamePasswordAuthenticationCredentials"
-		.format(config.target_auth["pw"], config.target_auth["user"]))
+	zap.users.set_authentication_credentials(
+		ctx_id,
+		user_id,
+		f'password={config.target_auth["pw"]}&username={config.target_auth["user"]}&type=UsernamePasswordAuthenticationCredentials',
+	)
+
 	zap.users.set_user_enabled(ctx_id, user_id, True)
 	return user_id
 
@@ -121,7 +138,7 @@ def spider(zap, max_duration, ctx_id=None, ctx_name=None, user_id=None):
 	# Start spidering based on the context rules (root URLs must have been accessed before)
 	# spider_scan_id = zap.spider.scan(contextname=ctx_name, recurse=True, subtreeonly=True)
 	spider_scan_id = zap.spider.scan_as_user(ctx_id, user_id, recurse=True, subtreeonly=True)
-	logging.debug("Spider id: " + str(spider_scan_id))
+	logging.debug(f"Spider id: {str(spider_scan_id)}")
 	try:
 		spider_scan_id = int(spider_scan_id)
 	except:
@@ -140,7 +157,7 @@ def spider(zap, max_duration, ctx_id=None, ctx_name=None, user_id=None):
 			logging.debug("Records-to-scan number limit reached - stopping...")
 			zap.spider.stop(spider_scan_id)
 			break
-		logging.debug ('Spider progress %: ' + zap.spider.status(spider_scan_id))
+		logging.debug(f'Spider progress %: {zap.spider.status(spider_scan_id)}')
 		time.sleep(5)
 	logging.debug ('Spider complete')
 	logging.debug(zap.spider.results(spider_scan_id))
@@ -151,14 +168,14 @@ def passive_scan(zap):
 	# Passive scans start right automatically after spidering (or accessing URLs)
 	# Wait for the passive scanning to complete
 	while (int(zap.pscan.records_to_scan) > 0):
-		logging.debug ('Records to passive scan : ' + zap.pscan.records_to_scan)
+		logging.debug(f'Records to passive scan : {zap.pscan.records_to_scan}')
 		time.sleep(2)
 	logging.debug ('Passive scanning complete')
 
 
 def active_scan_single(zap, target, max_duration, ctx_id=None, user_id=None):
 	# Unlike passive scan, active scan has to be manually triggered
-	logging.debug("Active scan for " + target)
+	logging.debug(f"Active scan for {target}")
 	active_scan_id = zap.ascan.scan(target, recurse=True, inscopeonly=True)
 	# The following doesn't work - Pending Simon's explanation of the 'target' requirement
 	# active_scan_id = zap.ascan.scan_as_user(target, ctx_id, user_id, recurse=True)
@@ -176,19 +193,17 @@ def active_scan_single(zap, target, max_duration, ctx_id=None, user_id=None):
 			logging.debug("Active scan timeout exceeded - stopping...")
 			zap.ascan.stop(active_scan_id)
 			break
-		logging.debug ('Active scan progress %: ' + zap.ascan.status(active_scan_id))
+		logging.debug(f'Active scan progress %: {zap.ascan.status(active_scan_id)}')
 		time.sleep(5)
-	logging.debug ('Active scan for ' + target + ' complete')
+	logging.debug(f'Active scan for {target} complete')
 
 
 def active_scan_all(zap, max_duration, ctx_id=None, user_id=None):
 	sites = zap.core.sites
 	total_sites = len(sites)
-	t_num = 0
-	for target in sites:
+	for t_num, target in enumerate(sites, start=1):
 		active_scan_single(zap, target, max_duration, ctx_id, user_id)
-		t_num += 1
-		logging.debug("{}/{} active scans completed".format(t_num, total_sites))
+		logging.debug(f"{t_num}/{total_sites} active scans completed")
 
 
 def report_results(zap, config_dict):
@@ -196,7 +211,7 @@ def report_results(zap, config_dict):
 	warn_count = 0
 	fail_count = 0
 	ignore_count = 0
-	report_string = 'Total of {} URLs\n'.format(len(zap.core.urls))
+	report_string = f'Total of {len(zap.core.urls)} URLs\n'
 
 	# Retrieve the alerts
 	alert_dict = {}
@@ -216,7 +231,7 @@ def report_results(zap, config_dict):
 			pass_dict[plugin_id] = rule.get('name')
 
 	for key, rule in sorted(pass_dict.iteritems()):
-		report_string += 'PASS: ' + rule + ' [' + key + ']\n'
+		report_string += f'PASS: {rule} [{key}' + ']\n'
 
 	pass_count = len(pass_dict)
 
@@ -236,7 +251,7 @@ def report_results(zap, config_dict):
 			+ '\n').format(alert_list[0].get('alert'), alert_list[0].get('pluginId'))
 
 		# Show (up to) first 5 urls
-		for alert in alert_list[0:5]:
+		for alert in alert_list[:5]:
 			report_string += ('\t' + alert.get('url') + '\n')
 
 	report_string += ('\nFAIL: ' + str(fail_count) + '\tWARN: ' + str(warn_count)

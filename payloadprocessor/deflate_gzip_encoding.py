@@ -6,7 +6,5 @@ import zlib;
 # The type of variable 'payload' is string.
 
 def process(payload):
-    # Do some processing to payload
-    compressed_payload = zlib.compress(payload);
-    return compressed_payload;
+    return zlib.compress(payload);
 

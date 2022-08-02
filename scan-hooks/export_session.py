@@ -11,7 +11,7 @@ rel_path = '/home/zap/.ZAP'
 
 def pre_exit(fail_count, warn_count, pass_count):
 	dir = rel_path
-	if os.path.exists(dev_path + '/session'):
+	if os.path.exists(f'{dev_path}/session'):
 		dir = dev_path
-	copytree(dir + '/session', '/zap/wrk/session')
-	copy2(dir + '/zap.log', '/zap/wrk')
+	copytree(f'{dir}/session', '/zap/wrk/session')
+	copy2(f'{dir}/zap.log', '/zap/wrk')

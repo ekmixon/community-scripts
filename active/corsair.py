@@ -25,12 +25,12 @@ Then, we call cors_scan, which will send that request and validate the response.
 """
 def scanNode(sas, msg):
   origMsg = msg
-  msg = origMsg.cloneRequest() 
+  msg = origMsg.cloneRequest()
   msg.getRequestHeader().setHeader("Origin", SM_ORIGIN)
   cors_scan(sas,msg, "fake origin")
   if origMsg.getRequestHeader().getHeader('Origin'):
     parsed_url = urlparse.urlparse(origMsg.getRequestHeader().getHeader('Origin'))
-    subdomain= parsed_url.scheme + '://' + SM_ORIGIN_DOMAIN + '.' + parsed_url.netloc
+    subdomain = f'{parsed_url.scheme}://{SM_ORIGIN_DOMAIN}.{parsed_url.netloc}'
     postdomain = origMsg.getRequestHeader().getHeader('Origin') + '.' + SM_ORIGIN_NO_PROTOCOL
     msg.getRequestHeader().setHeader("Origin", subdomain)
     cors_scan(sas,msg, "fake subdomain")
@@ -45,7 +45,7 @@ def cors_scan(sas,msg, test_type):
   sas.sendAndReceive(msg, True, False);
   header = str(msg.getResponseHeader().getHeader("Access-Control-Allow-Origin"))
   if (header in ['null', '*', msg.getRequestHeader().getHeader('Origin')]):
-    alertParam = "Test performed: Injecting a "+test_type
+    alertParam = f"Test performed: Injecting a {test_type}"
     sas.raiseAlert(alertRisk, alertConfidence, alertTitle, alertDescription + alertParam,  msg.getRequestHeader().getURI().toString(), "Origin",
        msg.getRequestHeader().getHeader('Origin'), alertInfo, alertSolution, msg.getRequestHeader().getHeader('Origin'), cweID, wascID, msg);
 

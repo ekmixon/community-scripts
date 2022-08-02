@@ -17,9 +17,7 @@ def appliesToHistoryType(histType):
 def find_words_in_params(param_list, word_list):
     result = []
     for word in word_list:
-        for param in param_list:
-            if word in param:
-                result.append(word)
+        result.extend(word for param in param_list if word in param)
     return result
 
 
@@ -68,7 +66,7 @@ def scan(ps, msg, src):
     if urlParam_repr in globalvar:
         return
 
-    ScriptVars.setGlobalVar("hunt", globalvar + ' , ' + urlParam_repr)
+    ScriptVars.setGlobalVar("hunt", f'{globalvar} , {urlParam_repr}')
 
     # Searching Debug and Logic
     result = find_words_in_params(params, words_dlp)

@@ -11,26 +11,19 @@ import json
 
 
 def get_context_name():
-    ctx_name = JOptionPane.showInputDialog(None, "Enter a Name for the Context")
-    return ctx_name
+    return JOptionPane.showInputDialog(None, "Enter a Name for the Context")
 
 
 def get_file_name():
     fc = JFileChooser()
     result = fc.showOpenDialog(None)
-    if not result == JFileChooser.APPROVE_OPTION:
-        return None
-    file_name = fc.getSelectedFile()
-    return file_name
+    return None if result != JFileChooser.APPROVE_OPTION else fc.getSelectedFile()
 
 
 def get_url_regexes(file_name, include):
     with open(file_name, "r") as f:
         data = json.load(f)
-    if include:
-        includes = get_includes(data)
-    else:
-        includes = get_excludes(data)
+    includes = get_includes(data) if include else get_excludes(data)
     regexes = []
     for include in includes:
         host = get_host(include)
@@ -52,9 +45,8 @@ def get_excludes(data):
 
 
 def add_www_case(protocol, host):
-    host = "www." + host
-    proper_regex = protocol + host + ".*"
-    return proper_regex
+    host = f"www.{host}"
+    return protocol + host + ".*"
 
 
 def get_host(include):
@@ -65,22 +57,17 @@ def get_host(include):
 
 def get_protocol(include):
     protocol = str(include['protocol'])
-    if protocol == "http":
-        protocol = "http://"
-    else:
-        protocol = "https://"
+    protocol = "http://" if protocol == "http" else "https://"
     return protocol
 
 
 def build_proper_regex(protocol, host):
-    proper_regex = protocol + host + ".*"
-    return proper_regex
+    return protocol + host + ".*"
 
 
 def create_new_context(ctx_name):
     session = Model().getSingleton().getSession()
-    new_context = session.getNewContext(ctx_name)
-    return new_context
+    return session.getNewContext(ctx_name)
 
 
 def include_in_context(url_regexes, context):

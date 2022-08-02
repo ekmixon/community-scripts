@@ -19,30 +19,25 @@ regex='soapactio.+';
 
 def search(msg):
   """ Searching inside the request """
-  match = re.search(regex, msg.getRequestHeader().toString(), re.IGNORECASE);
-  if(match):
+  if match := re.search(regex,
+                        msg.getRequestHeader().toString(), re.IGNORECASE):
     for header in msg.getRequestHeader().toString().split("\n"):
-      match = re.search(regex, header, re.IGNORECASE);
-      if(match):
+      if match := re.search(regex, header, re.IGNORECASE):
         yield header;
-  match = re.search(regex, msg.getRequestBody().toString(), re.IGNORECASE);
-  if(match):
+  if match := re.search(regex, msg.getRequestBody().toString(), re.IGNORECASE):
     for word in msg.getRequestBody().toString().split():
-      match = re.search(regex, word, re.IGNORECASE);
-      if(match):
+      if match := re.search(regex, word, re.IGNORECASE):
         yield word;
   """ Searching inside the response """
-  match = re.search(regex, msg.getResponseHeader().toString(), re.IGNORECASE);
-  if(match):
+  if match := re.search(regex,
+                        msg.getResponseHeader().toString(), re.IGNORECASE):
     for header in msg.getResponseHeader().toString().split("\n"):
-      match = re.search(regex, header, re.IGNORECASE);
-      if(match):
+      if match := re.search(regex, header, re.IGNORECASE):
         yield header;
-  match = re.search(regex, msg.getResponseBody().toString(), re.IGNORECASE);
-  if(match):
+  if match := re.search(regex,
+                        msg.getResponseBody().toString(), re.IGNORECASE):
     for word in msg.getResponseBody().toString().split():
-      match = re.search(regex, word, re.IGNORECASE);
-      if(match):
+      if match := re.search(regex, word, re.IGNORECASE):
         yield word;
 
 
@@ -56,7 +51,7 @@ class OutputWindow (AbstractFrame):
     
 
 if (tbHist != None):
-  final = list();
+  final = [];
   print("Searching History...");
   for index in tbHist.getHistoryIds(sessionId.getSessionId()):
     try:
@@ -67,7 +62,5 @@ if (tbHist != None):
           final.append(item);
     except StopIteration:
       pass;
-result = '';
-for item in final:
-  result+=item+"\n";
+result = ''.join(item+"\n" for item in final);
 output = OutputWindow(result);

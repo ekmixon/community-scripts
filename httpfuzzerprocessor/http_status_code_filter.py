@@ -11,7 +11,7 @@ def processResult(utils, fuzzResult) :
 
     if(fuzzResult.getHttpMessage().getResponseHeader().getStatusCode() == http_status_code):
         return bool(0);
-    
+
     # Returns true to accept the result, false to discard and not show it
     return bool(1);
 

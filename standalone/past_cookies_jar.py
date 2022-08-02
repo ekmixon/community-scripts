@@ -19,8 +19,7 @@ tbHist = Model.getSingleton().getDb().getTableHistory();
 
 def collect(msg):
   """ Collecting cookie from HttpMessage """
-  cookies = msg.getRequestHeader().getHttpCookies();
-  return cookies;
+  return msg.getRequestHeader().getHttpCookies();
 
 class OutputWindow (AbstractFrame):
   def __init__(self, text):
@@ -34,7 +33,7 @@ class OutputWindow (AbstractFrame):
     self.setVisible(True);
     
 if (tbHist != None):
-  unique_cookies = list();
+  unique_cookies = [];
   print("Collecting Unique Cookies...");
   for index in tbHist.getHistoryIds(sessionId.getSessionId()):
     try:
@@ -45,16 +44,11 @@ if (tbHist != None):
         continue;
       for item in results:
         item.setDomain(domain);
-        match = re.search(cookie_domain_regex, domain, re.IGNORECASE);
-        if(match):
-          cookie = domain+": "+item.getName()+"=\""+item.getValue()+"\"";
+        if match := re.search(cookie_domain_regex, domain, re.IGNORECASE):
+          cookie = f"{domain}: {item.getName()}" + "=\"" + item.getValue() + "\"";
           if(cookie not in unique_cookies):
             unique_cookies.append(cookie);
-        else:
-          pass
     except StopIteration:
       pass;
-result = '';
-for cookie in sorted(unique_cookies):
-  result+=cookie+"\n";
+result = ''.join(cookie+"\n" for cookie in sorted(unique_cookies));
 output = OutputWindow(result);

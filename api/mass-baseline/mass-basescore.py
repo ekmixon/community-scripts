@@ -5,12 +5,12 @@ import os
 import sys
 import traceback
 
-def parse_results (site, date, is_summary_file, file):
+def parse_results(site, date, is_summary_file, file):
   #print ('Parse results for ' + site)
   last_line = ''
   rra = ''
 
-  with open(sys.argv[1] + '/baseline-results/' + site + '/' + date, 'ro') as f:
+  with open(f'{sys.argv[1]}/baseline-results/{site}/{date}', 'ro') as f:
     for line in f:
       if line.startswith('LINK: '):
         rra = line[5:].rstrip('\n')
@@ -38,62 +38,62 @@ def parse_results (site, date, is_summary_file, file):
           ok = scores[4].split(': ')[1]
 
         if len(rra) > 0:
-          file.write ('| [' + site + '](' + rra + ')')
+          file.write(f'| [{site}]({rra})')
         else:
-          file.write ('| ' + site)
-        
+          file.write(f'| {site}')
+
         if int(fail) > 0:
-          file.write ('| [![Score](https://img.shields.io/badge/baseline-fail%20' + fail + '-red.svg)]')
+          file.write(
+              f'| [![Score](https://img.shields.io/badge/baseline-fail%20{fail}-red.svg)]'
+          )
         elif int (warn) > 0:
-          file.write ('| [![Score](https://img.shields.io/badge/baseline-warn%20' + warn + '-yellow.svg)]')
+          file.write(
+              f'| [![Score](https://img.shields.io/badge/baseline-warn%20{warn}-yellow.svg)]'
+          )
         else:
           file.write ('| [![Score](https://img.shields.io/badge/baseline-pass-green.svg)]')
-        file.write ('(baseline-results/' + site + '/' + date +')')
+        file.write(f'(baseline-results/{site}/{date})')
 
         if is_summary_file:
-          file.write ('| ' + warn + ' | ' + fail)
-          file.write ('| [' + date + '](Baseline-' + site + '-history) |')
+          file.write(f'| {warn} | {fail}')
+          file.write(f'| [{date}](Baseline-{site}-history) |')
         else:
-          file.write ('| ' + ok + ' | ' + warn + ' | ' + fail)
-          file.write ('| [' + date + '](baseline-results/' + site + '/' + date +') |')
+          file.write(f'| {ok} | {warn} | {fail}')
+          file.write(f'| [{date}](baseline-results/{site}/{date}) |')
         file.write ('\n')
       except:
         traceback.print_exc()
 
-def handle_site (name, summary_file):
-  #print ('Site: ' + name)
-  # Output the history page
-  f = open(sys.argv[1] + '/Baseline-' + name + '-history.md','w')
-  f.write('## ' + name + '\n\n')
-  f.write('| Site | Status | Pass | Warn | Fail | Date | \n')
-  f.write('| --- | --- | --- | --- | --- | --- |\n')
+def handle_site(name, summary_file):
+  with open(f'{sys.argv[1]}/Baseline-{name}-history.md', 'w') as f:
+    f.write(f'## {name}' + '\n\n')
+    f.write('| Site | Status | Pass | Warn | Fail | Date | \n')
+    f.write('| --- | --- | --- | --- | --- | --- |\n')
 
-  all_files = sorted(os.listdir(sys.argv[1] + '/baseline-results/' + name), reverse=True)
-  if len(all_files) > 0:
-    parse_results(name, all_files[0], True, summary_file)
-    for file in all_files:
-      parse_results(name, file, False, f)
+    all_files = sorted(
+        os.listdir(f'{sys.argv[1]}/baseline-results/{name}'), reverse=True)
+    if len(all_files) > 0:
+      parse_results(name, all_files[0], True, summary_file)
+      for file in all_files:
+        parse_results(name, file, False, f)
 
-  f.write ('\n [Back to summary page](Baseline-summary)\n')
-  f.close()
+    f.write ('\n [Back to summary page](Baseline-summary)\n')
 
 
 # Should just be one arg, the target directory
 if len(sys.argv) != 2:
-  print ("Usage " + sys.argv[0] + " directory")
+  print(f"Usage {sys.argv[0]} directory")
   sys.exit(1)
- 
 
-summary_file = open(sys.argv[1] + '/Baseline-Summary.md','w')
-# Header
-summary_file.write('| Site | Status | Warn | Fail | History | \n')
-summary_file.write('| --- | --- | --- | --- | --- |\n')
 
-last_file = ''
-last_site = ''
-for file in sorted(os.listdir(sys.argv[1] + '/baseline-results')):
-  if os.path.isdir(sys.argv[1] + '/baseline-results/' + file):
-    handle_site(file, summary_file)
+with open(f'{sys.argv[1]}/Baseline-Summary.md', 'w') as summary_file:
+  # Header
+  summary_file.write('| Site | Status | Warn | Fail | History | \n')
+  summary_file.write('| --- | --- | --- | --- | --- |\n')
 
-summary_file.close()
+  last_file = ''
+  last_site = ''
+  for file in sorted(os.listdir(f'{sys.argv[1]}/baseline-results')):
+    if os.path.isdir(f'{sys.argv[1]}/baseline-results/{file}'):
+      handle_site(file, summary_file)
 

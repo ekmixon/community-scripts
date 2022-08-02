@@ -9,12 +9,13 @@ def process(payload):
         for match in re.finditer(r"\b[A-Za-z_]+\b", retVal):
             word = match.group()
 
-            if ("%s(" % word) in payload:
+            if f"{word}(" in payload:
                 while True:
-                    _ = ""
+                    _ = "".join(
+                        word[i].upper() if randint(0, 1) else word[i].lower()
+                        for i in xrange(len(word))
+                    )
 
-                    for i in xrange(len(word)):
-                        _ += word[i].upper() if randint(0, 1) else word[i].lower()
 
                     if len(_) > 1 and _ not in (_.lower(), _.upper()):
                         break

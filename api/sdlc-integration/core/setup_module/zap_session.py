@@ -31,11 +31,11 @@ def normalize_input_url(target):
 		usage()
 		sys.exit(StatusCode.other)
 
-	if(target.find("//") == -1):
-		target = "//" + target
+	if (target.find("//") == -1):
+		target = f"//{target}"
 
 	base_url = urlparse.urlparse(target).netloc
-	logging.debug("Base url: " + base_url)
+	logging.debug(f"Base url: {base_url}")
 	return base_url
 
 
@@ -46,7 +46,7 @@ def add_proxy_scripts(zap):
 		# Note: scriptDescription parameter is required - API bug
 		zap.script.load(script, "proxy", "ECMAScript : Oracle Nashorn", filename, "")
 		response = zap.script.enable(script)
-		logging.debug("Loaded: " + filename + " - " + response)
+		logging.debug(f"Loaded: {filename} - {response}")
 
 
 def clean_zap_session(zap, target_url, config_dict):
@@ -63,9 +63,10 @@ def clean_zap_session(zap, target_url, config_dict):
 	# They can be listed 'print(zap.pscan.scanners)' and disabled by their ID here
 	zap.pscan.enable_all_scanners()
 	zap.ascan.enable_all_scanners()
-	ignored_scanners = ",".join([ i for i in config_dict if config_dict[i] == "IGNORE" ])
-	if ignored_scanners:
-		logging.info("Ignored scanners: " + ignored_scanners)
+	if ignored_scanners := ",".join(
+		[i for i in config_dict if config_dict[i] == "IGNORE"]
+	):
+		logging.info(f"Ignored scanners: {ignored_scanners}")
 		zap.pscan.disable_scanners(ignored_scanners) # ids*
 		zap.ascan.disable_scanners(ignored_scanners) # ids*
 	# ERR: disabling scanners not affecting scan time, only excluding from final result???

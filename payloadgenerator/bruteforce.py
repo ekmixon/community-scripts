@@ -2,17 +2,15 @@
 
 import base64;
 
-INITIAL_VALUE = 0; # set this when you need to continue an interrupted fuzzing session 
+INITIAL_VALUE = 0
 count = INITIAL_VALUE;
-user = str('admin');
+user = 'admin';
 passfile_path = 'C:\\Users\\user\\Documents\\wordlists\\passwords.txt';
-NUMBER_OF_PAYLOADS = sum(1 for line in open(passfile_path));
-passwd = list();
-for line in open(passfile_path):    # initializing passwords into list
-    passwd.append(line.rstrip());
-print('NUMBER_OF_PAYLOADS = ' + str(NUMBER_OF_PAYLOADS));
-print('len(passwd) = ' + str(len(passwd)));
-print('count = '+str(count));
+NUMBER_OF_PAYLOADS = sum(1 for _ in open(passfile_path));
+passwd = [line.rstrip() for line in open(passfile_path)];
+print(f'NUMBER_OF_PAYLOADS = {str(NUMBER_OF_PAYLOADS)}');
+print(f'len(passwd) = {len(passwd)}');
+print(f'count = {count}');
 
 
 # The number of generated payloads, zero to indicate unknown number.
@@ -31,13 +29,13 @@ def hasNext():
 # This method is called while hasNext() returns true.
 def next():
     global count;
-    print('next_count = ' + str(count));
+    print(f'next_count = {str(count)}');
     payload = count;
-    print('payload = ' + str(payload));
+    print(f'payload = {str(payload)}');
     count+=1;
-    print('incremented next_count = ' + str(count));
-    print(user+':'+passwd[payload]);
-    return base64.b64encode(user+':'+passwd[payload]);
+    print(f'incremented next_count = {count}');
+    print(f'{user}:{passwd[payload]}');
+    return base64.b64encode(f'{user}:{passwd[payload]}');
 
 
 # Resets the internal state of the payload generator, as if no calls to

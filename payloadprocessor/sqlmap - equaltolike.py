@@ -4,7 +4,7 @@ def process(payload):
 
     retVal = payload
 
-    if payload:
+    if retVal:
         retVal = re.sub(r"\s*=\s*", " LIKE ", retVal)
 
     return retVal

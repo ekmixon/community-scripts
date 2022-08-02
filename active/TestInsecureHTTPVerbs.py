@@ -36,13 +36,16 @@ def PrintAlerts(sas, msg, uri, insecureverb, responsestatuscode, responsestatusm
 
 	
 def ProcessAndPrintAlert(sas, msg, uri, insecureverb):
-	if not msg.getResponseHeader().getStatusCode() in acceptedhttpstatuscodesforinsecureverbs:
+	if (
+		msg.getResponseHeader().getStatusCode()
+		not in acceptedhttpstatuscodesforinsecureverbs
+	):
 		PrintAlerts(sas, msg, uri, insecureverb, msg.getResponseHeader().getStatusCode(), msg.getResponseHeader().getReasonPhrase())
 
 
 def PrepareHttpRequest(msg, insecureverb):
 	msg.mutateHttpMethod(insecureverb)
-	if insecureverb == "POST" or insecureverb == "PUT":
+	if insecureverb in ["POST", "PUT"]:
 		msg.setRequestBody("bodytext")
 		msg.getRequestHeader().setContentLength(msg.getRequestBody().length());
 	if printdebugmessages:
